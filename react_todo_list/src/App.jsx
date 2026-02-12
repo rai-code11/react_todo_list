@@ -1,16 +1,14 @@
 import { useState } from "react";
 import "./index.css";
+import { v4 as uuid } from "uuid";
 
-function Todo() {
+function App() {
   const [todoText, setTodoText] = useState("");
   const [todoList, setTodoList] = useState([]);
-  const [editIndex, setEditIndex] = useState(-1);
+  const [editId, setEditId] = useState(-1);
   const [editText, setEditText] = useState("");
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [deleteTargetIndex, setDeleteTargetIndex] = useState(null);
-
-  // const [completeCount, setCompleteCount] = useState(0);
-  // const [inCompleteCount, setIncompleteCount] = useState(todoList.length);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
 
   const completeCount = todoList.filter((t) => t.checked).length;
 
@@ -18,74 +16,48 @@ function Todo() {
 
   const onChangeTodoText = (e) => setTodoText(e.target.value);
 
+  const id = uuid();
+
   const onClickAdd = () => {
     if (todoText === "") return;
-    const newTodo = { text: todoText, checked: false };
+    const newTodo = { text: todoText, checked: false, id: id };
     const newTodos = [...todoList, newTodo];
     setTodoList(newTodos);
     setTodoText("");
-    // setIncompleteCount(inCompleteCount + 1);
   };
 
-  // const onClickEdit = () => {
-  //   const
-  // };
-
-  // if (targetTodo.checked) {
-  //   setCompleteCount((prev) => {
-  //     return prev - 1;
-  //   });
-  // } else {
-  //   setIncompleteCount((prev) => {
-  //     return prev - 1;
-  //   });
-  // }
-
-  // const handleCheckboxChange = (e) => {
-  //   if (e.target.checked) {
-  //     setCompleteCount(completeCount + 1);
-  //     setIncompleteCount(inCompleteCount - 1);
-  //   } else {
-  //     setCompleteCount(completeCount - 1);
-  //     setIncompleteCouえt(inCompleteCount + 1);
-  //   }
-
-  const handleCheckboxChange = (index) => {
-    const newTodos = [...todoList];
-    newTodos[index].checked = !newTodos[index].checked;
+  const handleCheckboxChange = (id) => {
+    const newTodos = todoList.map((todo) =>
+      todo.id === id ? { ...todo, checked: !todo.checked } : todo,
+    );
     setTodoList(newTodos);
   };
 
-  const onClickEdit = (index, text) => {
-    setEditIndex(index);
+  const onClickStartEdit = (id, text) => {
+    setEditId(id);
     setEditText(text);
   };
 
-  const onClickSave = (index) => {
-    const newTodos = [...todoList];
-    newTodos[index].text = editText;
+  const onClickUpdateTodo = (id) => {
+    const newTodos = todoList.map((todo) =>
+      todo.id === id ? { ...todo, text: editText } : todo,
+    );
     setTodoList(newTodos);
-    setEditIndex(-1);
+    setEditId(-1);
   };
 
-  const onClickDelete = (index) => {
-    const newTodos = [...todoList];
-    const targetTodo = newTodos[index];
-    console.log("削除するタスク:", targetTodo);
-    console.log("checkedの値は?:", targetTodo.checked);
-    newTodos.splice(index, 1);
-    setTodoList(newTodos);
-  };
-
-  const onClickOpenModal = (index) => {
-    setDeleteTargetIndex(index);
+  const onClickOpenModal = (id) => {
+    setDeleteTargetId(id);
     setIsOpenModal(true);
   };
 
-  const onClickModalDelete = () => {
-    onClickDelete(deleteTargetIndex);
+  const onClickDeleteAndModalDelete = (setDeleteTargetId) => {
+    const newTodos = todoList.filter((todo) => todo.id !== deleteTargetId);
+    console.log(newTodos);
+    setTodoList(newTodos);
+    console.log(deleteTargetId);
     setIsOpenModal(false);
-    setDeleteTargetIndex(null);
+    setDeleteTargetId(null);
   };
 
   return (
@@ -113,36 +85,38 @@ function Todo() {
 
         <div className="todo-list-area">
           <ul>
-            {todoList.map((todo, index) => (
-              <li key={index}>
-                {editIndex === index ? (
+            {todoList.map((todo) => (
+              <li key={todo.id}>
+                {editId === todo.id ? (
                   <div className="edit-area">
                     <input
                       value={editText}
                       onChange={(e) => setEditText(e.target.value)}
                       className="edit-form"
                     />
-                    <button onClick={() => onClickSave(index)}>保存</button>
+                    <button onClick={() => onClickUpdateTodo(todo.id)}>
+                      保存
+                    </button>
                   </div>
                 ) : (
                   <>
                     <input
                       type="checkbox"
                       checked={todo.checked}
-                      onChange={() => handleCheckboxChange(index)}
+                      onChange={() => handleCheckboxChange(todo.id)}
                     />
                     <p>{todo.text}</p>
                     <div className="edit-delete-buttons">
                       <button
                         onClick={() => {
-                          onClickEdit(index, todo.text);
+                          onClickStartEdit(todo.id, todo.text);
                         }}
                       >
                         編集
                       </button>
                       <button
                         onClick={() => {
-                          onClickOpenModal(index);
+                          onClickOpenModal(todo.id);
                         }}
                       >
                         削除
@@ -154,7 +128,11 @@ function Todo() {
                         <div className="modal">
                           <p>本当に削除しますか？</p>
                           <div className="buttons">
-                            <button onClick={() => onClickModalDelete(index)}>
+                            <button
+                              onClick={() =>
+                                onClickDeleteAndModalDelete(setDeleteTargetId)
+                              }
+                            >
                               OK
                             </button>
                             <button onClick={() => setIsOpenModal(false)}>
@@ -175,4 +153,4 @@ function Todo() {
   );
 }
 
-export default Todo;
+export default App;
