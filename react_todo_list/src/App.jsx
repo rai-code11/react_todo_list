@@ -1,35 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import "./index.css";
+
+import PrimaryButton from "./components/atoms/button/PrimaryButton";
+import AddTaskInput from "./components/molecules/addTaskInput";
+import CardBody from "./components/organisms/CardBody";
+import TodoCounter from "./components/molecules/TodoCounter";
+import EditDeleteButtons from "./components/molecules/EditDeleteButtons";
+import EditInput from "./components/atoms/input/editInput";
+import DeleteModal from "./components/molecules/DeleteModal";
+import TodoList from "./components/organisms/TodoList";
+import useTodo from "./hooks/useTodo";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const {
+    todoText,
+    todoList,
+    editId,
+    editText,
+    setEditText,
+    isOpenModal,
+    completeCount,
+    inCompleteCount,
+    setIsOpenModal,
+    onChangeTodoText,
+    onClickAdd,
+    handleCheckboxChange,
+    onClickStartEdit,
+    onClickUpdateTodo,
+    onClickOpenModal,
+    onClickDeleteAndModalDelete,
+  } = useTodo();
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className="todo-card">
+        <CardBody
+          todoText={todoText}
+          onChangeTodoText={onChangeTodoText}
+          onClickAdd={onClickAdd}
+        />
+        <TodoCounter
+          todoList={todoList}
+          completeCount={completeCount}
+          inCompleteCount={inCompleteCount}
+        ></TodoCounter>
+
+        <TodoList
+          todoList={todoList}
+          editId={editId}
+          editText={editText}
+          setEditText={setEditText}
+          onUpdate={onClickUpdateTodo}
+          onStartEdit={onClickStartEdit}
+          onCheck={handleCheckboxChange}
+          onOpenModal={onClickOpenModal}
+        />
+
+        {isOpenModal && (
+          <DeleteModal
+            onConfirm={onClickDeleteAndModalDelete}
+            onCancel={() => setIsOpenModal(false)}
+          />
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
